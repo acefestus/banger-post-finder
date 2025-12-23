@@ -1,0 +1,52 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String   @id @default(cuid())
+  xUserId       String   @unique
+  xUsername     String
+  accessToken   String
+  refreshToken  String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  posts         Post[]
+}
+
+model Post {
+  id             String   @id @default(cuid())
+  xPostId        String   @unique
+  authorId       String
+  author         User     @relation(fields: [authorId], references: [id])
+  text           String
+  likeCount      Int
+  retweetCount   Int
+  replyCount     Int
+  quoteCount     Int
+  createdAt      DateTime
+  collectedAt    DateTime @default(now())
+  sentimentScore Float?
+  viralityScore  Float?
+  bestPostTime   DateTime?
+  hashtags       HashtagOnPost[]
+}
+
+model Hashtag {
+  id       String          @id @default(cuid())
+  tag      String          @unique
+  posts    HashtagOnPost[]
+}
+
+model HashtagOnPost {
+  postId    String
+  hashtagId String
+  post      Post    @relation(fields: [postId], references: [id])
+  hashtag   Hashtag @relation(fields: [hashtagId], references: [id])
+
+  @@id([postId, hashtagId])
+}
